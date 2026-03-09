@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Restaurant Web (Next.js)
 
-## Getting Started
+Frontend for a single restaurant powered by the Restaurant API. Built with **Next.js (App Router)** and **JSX**.
 
-First, run the development server:
+## Configuration
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Set up your `.env.local` file:
+
+```env
+# Base URL for the API
+NEXT_PUBLIC_API_URL=https://restaurant.digitallisbon.pt/api
+
+# The ID of your specific restaurant in the database
+NEXT_PUBLIC_RESTAURANT_ID=9
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+cd restaurant-web
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+This application acts as the customer-facing website for **Restaurant ID 9** (or whichever ID you set in `.env.local`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Public:** Landing page with restaurant info (name, cuisine, description, address).
+- **Authenticated:** Profile, reservations list, create a reservation (`/book`).
+- **API client** in `src/lib/api.js` connects to the provided API endpoints.
+- **Auth context** in `src/context/AuthContext.js` handles user sessions (`localStorage`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Routes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Route | Description |
+|-------|-------------|
+| `/` | Landing page showing the restaurant's details |
+| `/book` | Make a reservation for the restaurant (requires login) |
+| `/login` | Log into a customer account |
+| `/register` | Register a new customer account |
+| `/profile` | View and edit user profile (authenticated) |
+| `/reservations` | List of the user's reservations (authenticated) |

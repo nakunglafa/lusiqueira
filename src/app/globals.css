@@ -1,26 +1,167 @@
 @import "tailwindcss";
 
+/* Client: Dark Wood + Glass Theme (burger restaurant – warm, not too dark) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #241e19;
+  --foreground: #f5f0e8;
+  /* Warm dark wood scale (50 = darkest) */
+  --wood-50: #1c1815;
+  --wood-100: #241e19;
+  --wood-200: #2d2620;
+  --wood-300: #3d342c;
+  --wood-400: #5c4f42;
+  --wood-500: #7d6b5a;
+  --wood-600: #b8a090;
+  --wood-700: #d4c4b0;
+  --wood-800: #e8ddd0;
+  --wood-900: #f2ebe3;
+  --wood-950: #faf6f2;
+  --accent: #c9a227;
+  --accent-hover: #b8921f;
+  /* Glass (glassy UI) */
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-strong: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+  /* Soft Professional – Owner Dashboard (low-eye-strain, WCAG AA) */
+  --owner-paper: #F5F2ED;
+  --owner-walnut: #2D241E;
+  --owner-charcoal: #2C2C2C;
+  --owner-card: #FFFFFF;
+  --owner-success: #7DA87B;
+  --owner-action: #8D6E63;
+  --owner-action-hover: #7A5F54;
+  --owner-nav-text: #F5F2ED;
+  --owner-muted: #5C5C5C;
+  --owner-border: rgba(45, 36, 30, 0.12);
+  --owner-card-shadow: 0 1px 3px rgba(45, 36, 30, 0.06), 0 4px 12px rgba(45, 36, 30, 0.04);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-wood-50: var(--wood-50);
+  --color-wood-100: var(--wood-100);
+  --color-wood-200: var(--wood-200);
+  --color-wood-300: var(--wood-300);
+  --color-wood-400: var(--wood-400);
+  --color-wood-500: var(--wood-500);
+  --color-wood-600: var(--wood-600);
+  --color-wood-700: var(--wood-700);
+  --color-wood-800: var(--wood-800);
+  --color-wood-900: var(--wood-900);
+  --color-wood-950: var(--wood-950);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-glass: var(--glass-bg);
+  --color-glass-strong: var(--glass-bg-strong);
+  --color-glass-border: var(--glass-border);
+  /* Owner dashboard – Soft Professional */
+  --color-owner-paper: var(--owner-paper);
+  --color-owner-walnut: var(--owner-walnut);
+  --color-owner-charcoal: var(--owner-charcoal);
+  --color-owner-card: var(--owner-card);
+  --color-owner-success: var(--owner-success);
+  --color-owner-action: var(--owner-action);
+  --color-owner-nav: var(--owner-nav-text);
+  --color-owner-muted: var(--owner-muted);
+  --color-owner-border: var(--owner-border);
+  --shadow-owner-card: 0 1px 3px rgba(45, 36, 30, 0.06), 0 4px 12px rgba(45, 36, 30, 0.04);
+  --font-sans: var(--font-montserrat), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-size-base: 1.0625rem;
+  --font-size-sm: 1rem;
+  --font-size-xs: 0.9375rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1a1612;
+    --foreground: #f2ebe3;
+    --wood-50: #161310;
+    --wood-100: #1a1612;
+    --wood-200: #241e19;
+    --wood-300: #2d2620;
+    --wood-400: #3d342c;
+    --wood-500: #5c4f42;
+    --wood-600: #b8a090;
+    --wood-700: #d4c4b0;
+    --wood-800: #e8ddd0;
+    --wood-900: #f2ebe3;
+    --wood-950: #faf6f2;
   }
 }
 
+html {
+  font-size: 17px;
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--wood-100);
+  color: var(--wood-900);
+  font-family: var(--font-montserrat), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* Owner dashboard: Soft Professional neutral theme – applied only to /owner routes */
+.owner-theme {
+  background-color: var(--owner-paper) !important;
+  color: var(--owner-charcoal);
+}
+.owner-theme .owner-theme-bg {
+  background-color: var(--owner-paper) !important;
+}
+/* Layered data cards: pure white + soft shadow */
+.owner-theme .owner-card {
+  background-color: var(--owner-card);
+  box-shadow: var(--owner-card-shadow);
+  border: 1px solid var(--owner-border);
+}
+/* Ensure text on cards stays Deep Charcoal (no pure black) */
+.owner-theme .owner-card,
+.owner-theme .owner-card * {
+  color: var(--owner-charcoal);
+}
+.owner-theme .owner-card .owner-muted {
+  color: var(--owner-muted);
+}
+
+/* Glass utility for client UI */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Light surfaces (cards, modals) – ensure contrast */
+.bg-white, .bg-wood-800, .bg-wood-900, .bg-wood-950,
+[class*="bg-wood-900"], [class*="bg-wood-800"], [class*="bg-wood-950"],
+.dark\:bg-wood-900,
+[class*="bg-zinc-900"]:not([class*="bg-zinc-900/"]) {
+  color: var(--wood-100);
+}
+.bg-white *, .bg-wood-800 *, .bg-wood-900 *, .bg-wood-950 *,
+[class*="bg-wood-900"] *, [class*="bg-wood-800"] *, [class*="bg-wood-950"] *,
+.dark\:bg-wood-900 *,
+[class*="bg-zinc-900"] *:not(button):not(a):not([class*="text-white"]):not([class*="text-emerald"]):not([class*="text-red"]):not([class*="text-amber"]) {
+  color: inherit;
+}
+
+/* Hide scrollbar but keep scroll – slick horizontal nav on mobile */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
