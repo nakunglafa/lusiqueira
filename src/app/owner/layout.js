@@ -42,18 +42,9 @@ function OwnerLayoutInner({ children }) {
   useEffect(() => {
     if (typeof window === "undefined" || !isOwner(user)) return;
 
-    const handleNewReservation = (e) => {
-      console.log("[OwnerLayout] New reservation received:", e.detail);
-      // You can add a toast notification here if you like
-    };
-
-    const handleReservationUpdated = (e) => {
-      console.log("[OwnerLayout] Reservation updated:", e.detail);
-    };
-
-    const handleNewOrder = (e) => {
-      console.log("[OwnerLayout] New order received:", e.detail);
-    };
+    const handleNewReservation = () => {};
+    const handleReservationUpdated = () => {};
+    const handleNewOrder = () => {};
 
     window.addEventListener(EVENTS.NEW_RESERVATION, handleNewReservation);
     window.addEventListener(EVENTS.RESERVATION_UPDATED, handleReservationUpdated);

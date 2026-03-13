@@ -76,7 +76,9 @@ const options = {
           token.email = u.email ?? profile.email;
           token.name = u.name ?? profile.name;
         } catch (e) {
-          console.error("Laravel Google auth failed", e);
+          if (process.env.NODE_ENV !== "production") {
+            console.error("Laravel Google auth failed", e);
+          }
         }
       }
       return token;

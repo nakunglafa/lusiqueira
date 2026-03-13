@@ -181,7 +181,7 @@ export function RealTimeNotificationProvider({ children }) {
         const list = Array.isArray(data) ? data : data?.data ?? data?.restaurants ?? [];
         return list.map((r) => (typeof r === "object" ? r.id : r)).filter(Boolean);
       }).catch((e) => {
-        console.error("[Notifications] Failed to fetch restaurants for user channels", e);
+        if (DEBUG) console.error("[Notifications] Failed to fetch restaurants for user channels", e);
         return [];
       });
     };
@@ -219,7 +219,7 @@ export function RealTimeNotificationProvider({ children }) {
         if (DEBUG) console.log("[Notifications] Subscribed to user channel: private-" + userChannelName);
       });
       userChannel.on("pusher:subscription_error", (err) => {
-        console.error("[Notifications] User channel subscription failed:", err);
+        if (DEBUG) console.error("[Notifications] User channel subscription failed:", err);
       });
 
       // Restaurant channels (ReservationCreated, ReservationUpdated, OrderCreated) - must use .private() for auth

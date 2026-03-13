@@ -52,7 +52,9 @@ export function useScreenWakeLock(enabled) {
         });
       } catch (err) {
         // e.g. not in secure context, low battery, or user denied
-        console.warn("Screen Wake Lock could not be acquired:", err?.message);
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("Screen Wake Lock could not be acquired:", err?.message);
+        }
       }
     };
 
