@@ -60,13 +60,13 @@ function CategorySection({ category, addItem, isNested = false }) {
 
   const HeadingTag = isNested ? "h4" : "h3";
   const headingClass = isNested
-    ? "text-base font-semibold text-wood-800"
-    : "text-lg font-semibold text-wood-900";
+    ? "text-base font-semibold text-wood-800 text-center"
+    : "text-lg font-semibold text-wood-900 text-center";
 
   return (
-    <div className={isNested ? "mt-6 pl-4 border-l-2 border-wood-500/40" : ""}>
+    <div className={isNested ? "mt-6" : ""}>
       {(category.name || category.description) && (
-        <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="mb-4 flex flex-col items-center gap-3 text-center">
           {category.image_url && (
             <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-wood-300/50">
               <img
@@ -87,7 +87,7 @@ function CategorySection({ category, addItem, isNested = false }) {
         </div>
       )}
       {items.length > 0 && (
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
           {items.map((item) => (
             <MenuItemCard key={item.id ?? item.name ?? Math.random()} item={item} addItem={addItem} />
           ))}
@@ -127,7 +127,16 @@ export default function MenuPage() {
       <Header />
       <main className="mx-auto max-w-6xl px-4 py-8 md:py-12 pb-24 md:pb-24">
         {restaurant?.name && (
-          <p className="mb-8 text-wood-600">{restaurant.name}</p>
+          <div className="mb-6 text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-wood-900">
+              {restaurant.name}
+            </h1>
+            {restaurant.cuisine && (
+              <p className="mt-2 text-wood-600">
+                {restaurant.cuisine}
+              </p>
+            )}
+          </div>
         )}
 
         {loading && (

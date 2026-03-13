@@ -355,6 +355,47 @@ export async function deleteItem(token, itemId) {
   return apiFetch(`/owner/items/${itemId}`, { method: "DELETE", token });
 }
 
+// Special menus (owner)
+export async function getSpecialMenusForRestaurant(token, restaurantId, params = {}) {
+  const q = new URLSearchParams(params).toString();
+  return apiFetch(`/owner/restaurants/${restaurantId}/special-menus${q ? `?${q}` : ""}`, { token });
+}
+
+export async function createSpecialMenu(token, restaurantId, data) {
+  return apiFetch(`/owner/restaurants/${restaurantId}/special-menus`, {
+    method: "POST",
+    body: JSON.stringify(data),
+    token,
+  });
+}
+
+export async function getSpecialMenuById(token, specialMenuId) {
+  return apiFetch(`/owner/special-menus/${specialMenuId}`, { token });
+}
+
+export async function updateSpecialMenu(token, specialMenuId, data) {
+  return apiFetch(`/owner/special-menus/${specialMenuId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+    token,
+  });
+}
+
+export async function deleteSpecialMenu(token, specialMenuId) {
+  return apiFetch(`/owner/special-menus/${specialMenuId}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+export async function updateSpecialMenuItems(token, specialMenuId, itemIds) {
+  return apiFetch(`/owner/special-menus/${specialMenuId}/items`, {
+    method: "PUT",
+    body: JSON.stringify({ item_ids: itemIds }),
+    token,
+  });
+}
+
 // Tables
 export async function getRestaurantTables(token, restaurantId) {
   return apiFetch(`/owner/restaurants/${restaurantId}/tables`, { token });

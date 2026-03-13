@@ -4,11 +4,12 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { isOwner } from "@/lib/owner-utils";
 import { OwnerRefreshProvider } from "@/context/OwnerRefreshContext";
 import { EVENTS } from "@/context/RealTimeNotificationContext";
 
-export default function OwnerLayout({ children }) {
+function OwnerLayoutInner({ children }) {
   const router = useRouter();
   const { user, isAuthenticated, loading, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -151,5 +152,13 @@ export default function OwnerLayout({ children }) {
         <main>{children}</main>
       </div>
     </OwnerRefreshProvider>
+  );
+}
+
+export default function OwnerLayout({ children }) {
+  return (
+    <AuthProvider>
+      <OwnerLayoutInner>{children}</OwnerLayoutInner>
+    </AuthProvider>
   );
 }

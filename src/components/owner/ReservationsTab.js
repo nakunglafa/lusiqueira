@@ -268,7 +268,7 @@ export function ReservationsTab({ restaurantId, reservations: reservationsProp, 
   const displayList = mainTab === "upcoming" ? upcomingFiltered : historyPaginated;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 max-w-full min-w-0">
       {/* Main tabs: Upcoming | History */}
       <div className="flex gap-2 rounded-xl bg-owner-paper p-1.5 border border-owner-border">
         <button

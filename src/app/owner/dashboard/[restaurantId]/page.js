@@ -17,6 +17,7 @@ import { useOwnerRefresh } from "@/context/OwnerRefreshContext";
 import { useScreenWakeLock, getKeepScreenOnPreference } from "@/hooks/useScreenWakeLock";
 import { OrdersTab } from "@/components/owner/OrdersTab";
 import { MenuTab } from "@/components/owner/MenuTab";
+import { SpecialMenusTab } from "@/components/owner/SpecialMenusTab";
 import { TablesTab } from "@/components/owner/TablesTab";
 import { ReservationsTab } from "@/components/owner/ReservationsTab";
 import { SettingsTab } from "@/components/owner/SettingsTab";
@@ -46,6 +47,15 @@ const TABS = [
         <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
         <path d="M7 2v20" />
         <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+      </svg>
+    ),
+  },
+  {
+    id: "special-menus",
+    label: "Special menus",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={iconClass}>
+        <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2" />
       </svg>
     ),
   },
@@ -205,11 +215,7 @@ export default function OwnerDashboardRestaurantPage() {
   return (
     <div className="owner-theme-bg min-h-screen pb-20 md:pb-0">
       <header className="sticky top-0 z-10 border-b border-owner-walnut/20 bg-owner-walnut/95 backdrop-blur text-owner-nav">
-        <div
-          className={`mx-auto flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between ${
-            activeTab === "menu" ? "max-w-7xl xl:max-w-[90rem]" : "max-w-6xl"
-          }`}
-        >
+        <div className="mx-auto flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between max-w-6xl">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
             <Link
               href="/owner/dashboard"
@@ -240,9 +246,7 @@ export default function OwnerDashboardRestaurantPage() {
           )}
         </div>
         {/* Desktop: icon + bold label in same row */}
-        <nav className={`hidden md:flex md:gap-2 md:overflow-x-auto md:pb-2 mx-auto px-4 ${
-          activeTab === "menu" ? "max-w-7xl xl:max-w-[90rem]" : "max-w-6xl"
-        }`}>
+        <nav className="hidden md:flex md:gap-2 md:overflow-x-auto md:pb-2 mx-auto px-4 max-w-6xl">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -276,11 +280,7 @@ export default function OwnerDashboardRestaurantPage() {
         ))}
       </nav>
 
-      <main
-        className={`mx-auto px-4 py-6 pb-8 sm:pb-6 ${
-          activeTab === "menu" ? "max-w-7xl xl:max-w-[90rem]" : "max-w-6xl"
-        }`}
-      >
+      <main className="mx-auto px-4 py-6 pb-8 sm:pb-6 max-w-6xl">
         {error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
             <p className="text-red-600">{error}</p>
@@ -307,6 +307,12 @@ export default function OwnerDashboardRestaurantPage() {
             restaurantId={restaurantId}
             token={token}
             onRefresh={loadData}
+          />
+        )}
+        {activeTab === "special-menus" && (
+          <SpecialMenusTab
+            restaurantId={restaurantId}
+            token={token}
           />
         )}
         {activeTab === "tables" && (

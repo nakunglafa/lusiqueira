@@ -39,7 +39,7 @@ export function TablesTab({ restaurantId, token }) {
   }, [loadTables]);
 
   return (
-    <div className="space-y-4">
+  <div className="space-y-6 max-w-full min-w-0">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-2">
         <button
           type="button"
