@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { getRestaurant } from "@/lib/api";
@@ -115,6 +115,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeBanner, setActiveBanner] = useState(0);
+  const specialsRowRef = useRef(null);
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -154,6 +155,49 @@ export default function Home() {
     });
     return items.slice(0, 12);
   }, [data, restaurant]);
+
+  const specialMenuListsForUI = useMemo(() => {
+    const lists =
+      restaurant?.special_menu_lists ??
+      data?.special_menu_lists ??
+      [];
+    if (!Array.isArray(lists)) return [];
+
+    return lists
+      .filter((l) => l && l.is_active !== false)
+      .map((l) => {
+        const items = Array.isArray(l.items) ? l.items : [];
+        const filtered = items.filter((it) => it?.is_available !== false);
+        return {
+          id: l.id ?? l.slug ?? l.name,
+          name: l.name ?? "Special",
+          items: filtered,
+        };
+      })
+      .filter((l) => l.items.length > 0);
+  }, [data, restaurant]);
+
+  // Auto-slide horizontal "Chef's specials" row
+  useEffect(() => {
+    if (!specialsRowRef.current || specialItems.length === 0) return;
+    const row = specialsRowRef.current;
+    const card = row.querySelector("article");
+    if (!card) return;
+
+    const cardWidth = card.getBoundingClientRect().width + 16; // include gap
+
+    const interval = setInterval(() => {
+      if (!row) return;
+      const maxScroll = row.scrollWidth - row.clientWidth;
+      const next = row.scrollLeft + cardWidth;
+      row.scrollTo({
+        left: next >= maxScroll ? 0 : next,
+        behavior: "smooth",
+      });
+    }, AUTO_SLIDE_MS);
+
+    return () => clearInterval(interval);
+  }, [specialItems.length]);
 
   return (
     <div className="min-h-screen bg-wood-100">
@@ -215,16 +259,20 @@ export default function Home() {
         </div>
       </section>
       <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
-        <section className="mb-10 text-center md:mb-16">
+        <section className="mb-10 md:mb-16">
           {loading ? (
             <div className="py-20 text-[17px] text-wood-600">Loading...</div>
           ) : error ? (
             <div className="py-20 text-[17px] text-red-400">{error}</div>
           ) : (
-            <div className="glass-strong rounded-3xl p-8 md:p-12 text-left max-w-3xl mx-auto border border-white/10 shadow-2xl">
+            <div className="rounded-3xl p-6 md:p-10 text-left max-w-4xl mx-auto shadow-2xl bg-transparent w-full outline-none focus:outline-none focus:ring-0">
               {restaurant?.logo_url && (
                 <div className="mb-6 flex justify-center">
-                  <img src={restaurant.logo_url} alt={`${restaurant.name} logo`} className="h-20 w-20 sm:h-24 sm:w-24 rounded-full object-cover shadow-xl ring-2 ring-wood-500/50 ring-offset-2 ring-offset-transparent" />
+                  <img
+                    src={restaurant.logo_url}
+                    alt={`${restaurant.name} logo`}
+                    className="h-20 w-20 sm:h-24 sm:w-24 rounded-full object-cover shadow-xl ring-2 ring-wood-500/50 ring-offset-2 ring-offset-transparent"
+                  />
                 </div>
               )}
               <h1 className="mb-4 text-3xl font-bold tracking-tight text-wood-900 sm:text-5xl">
@@ -250,19 +298,34 @@ export default function Home() {
                   {restaurant.description}
                 </p>
               )}
-              <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 px-2 sm:px-0">
-                <Link
-                  href="/menu"
-                  className="w-full sm:w-auto rounded-full border-2 border-wood-500/60 bg-white/5 px-8 py-3.5 text-[17px] font-medium text-wood-900 hover:bg-white/10 hover:border-wood-500 transition-colors backdrop-blur-sm"
-                >
-                  View Menu
-                </Link>
-                <Link
-                  href="/book"
-                  className="w-full sm:w-auto rounded-full bg-accent px-8 py-3.5 text-[17px] font-medium text-wood-950 hover:bg-accent-hover text-center transition-colors shadow-lg hover:shadow-xl"
-                >
-                  Book a Table
-                </Link>
+              <div className="mt-8">
+                <div className="rounded-2xl border border-white/10 p-4 md:p-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] gap-4 items-stretch">
+                    <div className="h-full flex flex-col justify-center text-center sm:text-left">
+                      <p className="text-sm font-medium text-wood-900">Contact</p>
+                      <p className="mt-1 text-[15px] text-wood-600 wrap-break-word">
+                        {restaurant?.address ? restaurant.address : ""}
+                      </p>
+                      {restaurant?.phone && (
+                        <p className="mt-1 text-[15px] text-wood-600">{restaurant.phone}</p>
+                      )}
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3 h-full">
+                      <Link
+                        href="/menu"
+                        className="flex-1 rounded-full border-2 border-wood-500/60 bg-transparent px-6 py-3 text-[16px] font-medium text-wood-900 hover:bg-white/10 hover:border-wood-500 transition-colors backdrop-blur-sm text-center focus:outline-none focus:ring-0"
+                      >
+                        View Menu
+                      </Link>
+                      <Link
+                        href="/book"
+                        className="flex-1 rounded-full bg-accent px-6 py-3 text-[16px] font-medium text-wood-950 hover:bg-accent-hover text-center transition-colors shadow-lg hover:shadow-xl focus:outline-none focus:ring-0"
+                      >
+                        Book a Table
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -270,59 +333,121 @@ export default function Home() {
 
         {!loading && !error && specialItems.length > 0 && (
           <section className="mb-12 md:mb-16">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl md:text-3xl font-semibold text-wood-900">
-                Chef&apos;s specials
-              </h2>
-              <Link
-                href="/menu"
-                className="text-sm font-medium text-wood-700 hover:text-wood-900"
-              >
-                View full menu
-              </Link>
-            </div>
-            <p className="mb-4 text-sm text-wood-600">
-              A curated selection of highlighted dishes from the menu.
-            </p>
-            <div className="-mx-4 px-4">
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-wood-400/70 scrollbar-track-transparent">
-                {specialItems.map((item) => (
-                  <article
-                    key={item.id ?? item.menu_item_id}
-                    className="relative w-56 shrink-0 rounded-2xl overflow-hidden bg-white/5 border border-white/10 shadow-sm hover:shadow-md transition-shadow"
+            <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 lg:px-8">
+              <div className="max-w-6xl mx-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl md:text-3xl font-semibold text-wood-900">
+                    Chef&apos;s specials
+                  </h2>
+                  <Link
+                    href="/menu"
+                    className="text-sm font-medium text-wood-700 hover:text-wood-900"
                   >
-                    <div className="relative h-40 w-full overflow-hidden">
-                      {item.image_url ? (
-                        <img
-                          src={item.image_url}
-                          alt={item.name ?? "Special item"}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-wood-300/40 text-wood-700 text-sm font-semibold">
-                          {item.name ?? "Special item"}
-                        </div>
-                      )}
-                      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 via-black/30 to-transparent px-3 py-2">
-                        <p className="text-sm font-semibold text-white line-clamp-2">
+                    View full menu
+                  </Link>
+                </div>
+
+                <p className="mb-4 text-sm text-wood-600">
+                  A curated selection of highlighted dishes from the menu.
+                </p>
+
+                <div
+                  ref={specialsRowRef}
+                  className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
+                >
+                  {specialItems.map((item) => (
+                    <article
+                      key={item.id ?? item.menu_item_id}
+                      className="w-56 shrink-0 rounded-2xl bg-white/5 shadow-sm hover:shadow-md transition-shadow overflow-hidden cursor-grab active:cursor-grabbing"
+                    >
+                      <div className="h-40 w-full overflow-hidden bg-black/5">
+                        {item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.name ?? "Special item"}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-wood-300/40 text-wood-700 text-sm font-semibold">
+                            {item.name ?? "Special item"}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="px-3 py-3">
+                        <h3 className="text-sm font-semibold text-wood-900 line-clamp-2">
                           {item.name}
-                        </p>
+                        </h3>
+                        {item.price != null && item.price !== "" && (
+                          <p className="mt-1 text-sm font-semibold text-wood-900">
+                            {formatPrice(item.price)}
+                          </p>
+                        )}
+                        {item.description && (
+                          <p className="mt-1 text-xs text-wood-600 line-clamp-2">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {!loading && !error && specialMenuListsForUI.length > 0 && (
+          <section className="mb-12 md:mb-16">
+            <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 lg:px-8">
+              <div className="max-w-6xl mx-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl md:text-3xl font-semibold text-wood-900">
+                    Special menus
+                  </h2>
+                </div>
+
+                <div className="space-y-10">
+                  {specialMenuListsForUI.map((list) => (
+                    <div key={String(list.id)} className="space-y-3">
+                      <h3 className="text-lg md:text-xl font-semibold text-wood-900">
+                        {list.name}
+                      </h3>
+                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                        {list.items.map((item) => (
+                          <article
+                            key={item.id ?? item.menu_category_id ?? item.name}
+                            className="w-56 shrink-0 rounded-2xl bg-white/5 border border-white/10 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                          >
+                            <div className="h-32 w-full overflow-hidden bg-black/5">
+                              {item.image_url ? (
+                                <img
+                                  src={item.image_url}
+                                  alt={item.name ?? "Special item"}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center bg-wood-300/40 text-wood-700 text-sm font-semibold">
+                                  {item.name ? item.name.slice(0, 18) : "Special item"}
+                                </div>
+                              )}
+                            </div>
+                            <div className="px-3 py-3">
+                              <h4 className="text-sm font-semibold text-wood-900 line-clamp-2">
+                                {item.name}
+                              </h4>
+                              {item.price != null && item.price !== "" && (
+                                <p className="mt-1 text-sm font-semibold text-wood-900">
+                                  {formatPrice(item.price)}
+                                </p>
+                              )}
+                            </div>
+                          </article>
+                        ))}
                       </div>
                     </div>
-                    <div className="px-3 py-2">
-                      {item.price != null && item.price !== "" && (
-                        <p className="text-sm font-semibold text-wood-900">
-                          {formatPrice(item.price)}
-                        </p>
-                      )}
-                      {item.description && (
-                        <p className="mt-1 text-xs text-wood-600 line-clamp-2">
-                          {item.description}
-                        </p>
-                      )}
-                    </div>
-                  </article>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </section>
@@ -333,7 +458,7 @@ export default function Home() {
             <h2 className="mb-6 text-xl md:text-2xl font-semibold text-wood-900 border-b border-white/10 pb-4">
               Information
             </h2>
-            <div className="grid gap-8 sm:grid-cols-2">
+            <div className="grid gap-8 sm:grid-cols-2 w-full">
               <div>
                 <h3 className="mb-4 text-[17px] font-medium text-wood-900">Opening Hours</h3>
                 {openingHours.length > 0 ? (
@@ -365,6 +490,21 @@ export default function Home() {
             </div>
           </section>
         )}
+
+        {/* Google maps - full width at the bottom */}
+        <section className="mt-12 md:mt-16 w-screen relative left-1/2 -translate-x-1/2">
+          <div className="h-[320px] sm:h-[380px] md:h-[450px] w-full overflow-hidden">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3998.6603720699095!2d-9.152773323431077!3d38.754076455147136!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd19332be308e0b9%3A0xd5f9201a9f240b46!2sLusiqueira%20Burger%20and%20Grill%20Restaurant!5e1!3m2!1sen!2spt!4v1773770427867!5m2!1sen!2spt"
+              width="100%"
+              height="100%"
+              style={{ border: 0, width: "100%", height: "100%" }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </section>
       </main>
     </div>
   );

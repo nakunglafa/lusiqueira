@@ -8,7 +8,15 @@ export default async function MenuPage() {
   const restaurant = data?.restaurant ?? data?.data ?? null;
   const menusRaw = restaurant?.menus ?? data?.menus ?? [];
   const menus = Array.isArray(menusRaw) ? menusRaw : menusRaw ? [menusRaw] : [];
+  const specialMenuListsRaw = restaurant?.special_menu_lists ?? data?.special_menu_lists ?? [];
+  const specialMenuLists = Array.isArray(specialMenuListsRaw)
+    ? specialMenuListsRaw
+    : specialMenuListsRaw
+      ? [specialMenuListsRaw]
+      : [];
 
-  return <MenuClient restaurant={restaurant} menus={menus} />;
+  return (
+    <MenuClient restaurant={restaurant} menus={menus} specialMenuLists={specialMenuLists} />
+  );
 }
 
