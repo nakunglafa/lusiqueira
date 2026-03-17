@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { getRestaurant } from "@/lib/api";
+import { useCart } from "@/context/CartContext";
 
 const BANNER_SLIDES = [
   {
@@ -29,6 +30,7 @@ const BANNER_SLIDES = [
 ];
 
 const RESTAURANT_ID = process.env.NEXT_PUBLIC_RESTAURANT_ID || "9";
+const RESTAURANT_NAME_ENV = process.env.NEXT_PUBLIC_RESTAURANT_NAME || null;
 
 function formatPrice(value) {
   if (value == null || value === "") return "";
@@ -116,6 +118,10 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [activeBanner, setActiveBanner] = useState(0);
   const specialsRowRef = useRef(null);
+  const specialMenusRowRefs = useRef([]);
+  const { addItem } = useCart();
+  const [activeSpecialId, setActiveSpecialId] = useState(null);
+  const [activeSpecialMenuItemId, setActiveSpecialMenuItemId] = useState(null);
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -199,6 +205,56 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [specialItems.length]);
 
+  // Auto-slide all special menu rows
+  useEffect(() => {
+    const rows = (specialMenusRowRefs.current || []).filter(Boolean);
+    if (rows.length === 0) return;
+
+    const intervals = rows.map((row) => {
+      const card = row.querySelector("article");
+      if (!card) return null;
+      const cardWidth = card.getBoundingClientRect().width + 16;
+
+      return setInterval(() => {
+        const maxScroll = row.scrollWidth - row.clientWidth;
+        const next = row.scrollLeft + cardWidth;
+        row.scrollTo({
+          left: next >= maxScroll ? 0 : next,
+          behavior: "smooth",
+        });
+      }, AUTO_SLIDE_MS);
+    });
+
+    return () => {
+      intervals.forEach((id) => id && clearInterval(id));
+    };
+  }, [specialMenuListsForUI.length]);
+
+  // Enable mouse-drag horizontal scrolling for specials rows (desktop)
+  const isDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragScrollLeftRef = useRef(0);
+
+  const handleDragStart = (e) => {
+    const el = e.currentTarget;
+    isDraggingRef.current = true;
+    dragStartXRef.current = e.pageX - el.offsetLeft;
+    dragScrollLeftRef.current = el.scrollLeft;
+  };
+
+  const handleDragMove = (e) => {
+    if (!isDraggingRef.current) return;
+    const el = e.currentTarget;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = x - dragStartXRef.current;
+    el.scrollLeft = dragScrollLeftRef.current - walk;
+  };
+
+  const handleDragEnd = () => {
+    isDraggingRef.current = false;
+  };
+
   return (
     <div className="min-h-screen bg-wood-100">
       <Header />
@@ -276,7 +332,7 @@ export default function Home() {
                 </div>
               )}
               <h1 className="mb-4 text-3xl font-bold tracking-tight text-wood-900 sm:text-5xl">
-                {restaurant?.name || "Our Restaurant"}
+                {RESTAURANT_NAME_ENV || restaurant?.name || "Our Restaurant"}
               </h1>
               {restaurant?.cuisine && (
                 <p className="mx-auto mt-2 max-w-xl text-[17px] sm:text-lg font-medium text-wood-600">
@@ -353,19 +409,29 @@ export default function Home() {
 
                 <div
                   ref={specialsRowRef}
-                  className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
+                  className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide cursor-grab active:cursor-grabbing"
+                  onMouseDown={handleDragStart}
+                  onMouseMove={handleDragMove}
+                  onMouseLeave={handleDragEnd}
+                  onMouseUp={handleDragEnd}
                 >
-                  {specialItems.map((item) => (
+                  {specialItems.map((item) => {
+                    const itemKey = item.id ?? item.menu_item_id;
+                    const isActive = activeSpecialId === itemKey;
+                    return (
                     <article
-                      key={item.id ?? item.menu_item_id}
-                      className="w-56 shrink-0 rounded-2xl bg-white/5 shadow-sm hover:shadow-md transition-shadow overflow-hidden cursor-grab active:cursor-grabbing"
+                      key={itemKey}
+                      className="group relative w-56 shrink-0 rounded-2xl bg-white/5 shadow-sm hover:shadow-md transition-transform duration-200 hover:scale-105 overflow-hidden"
+                      onClick={() =>
+                        setActiveSpecialId((prev) => (prev === itemKey ? null : itemKey))
+                      }
                     >
-                      <div className="h-40 w-full overflow-hidden bg-black/5">
+                      <div className="h-56 w-full overflow-hidden bg-black/5">
                         {item.image_url ? (
                           <img
                             src={item.image_url}
                             alt={item.name ?? "Special item"}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-cover transition duration-200 group-hover:blur-sm group-hover:brightness-75"
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-wood-300/40 text-wood-700 text-sm font-semibold">
@@ -374,23 +440,56 @@ export default function Home() {
                         )}
                       </div>
 
-                      <div className="px-3 py-3">
+                      <div className="px-3 py-3 space-y-1">
                         <h3 className="text-sm font-semibold text-wood-900 line-clamp-2">
                           {item.name}
                         </h3>
                         {item.price != null && item.price !== "" && (
-                          <p className="mt-1 text-sm font-semibold text-wood-900">
+                          <p className="text-sm font-semibold text-wood-900">
                             {formatPrice(item.price)}
                           </p>
                         )}
-                        {item.description && (
-                          <p className="mt-1 text-xs text-wood-600 line-clamp-2">
-                            {item.description}
-                          </p>
-                        )}
                       </div>
+
+                      {item.description && (
+                        <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 transition-all duration-200 ${
+                          isActive ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100"
+                        }`}>
+                          <div className="mx-1 mb-1 rounded-2xl bg-white text-wood-800 text-[11px] leading-snug p-3 shadow-xl backdrop-blur-md max-h-40 overflow-y-auto">
+                            <p className="whitespace-pre-line">{item.description}</p>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addItem(item, 1);
+                              }}
+                              className="mt-2 w-full rounded-full bg-accent px-3 py-1.5 text-[11px] font-semibold text-wood-950 hover:bg-accent-hover transition-colors pointer-events-auto"
+                            >
+                              Add to cart
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      {!item.description && (
+                        <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 transition-all duration-200 ${
+                          isActive ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100"
+                        }`}>
+                          <div className="mx-1 mb-1 rounded-2xl bg-white text-wood-800 text-[11px] leading-snug p-3 shadow-xl backdrop-blur-md">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addItem(item, 1);
+                              }}
+                              className="w-full rounded-full bg-accent px-3 py-1.5 text-[11px] font-semibold text-wood-950 hover:bg-accent-hover transition-colors pointer-events-auto"
+                            >
+                              Add to cart
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </article>
-                  ))}
+                  )})}
                 </div>
               </div>
             </div>
@@ -401,7 +500,7 @@ export default function Home() {
           <section className="mb-12 md:mb-16">
             <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4 sm:px-6 lg:px-8">
               <div className="max-w-6xl mx-auto">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-6 text-center">
                   <h2 className="text-2xl md:text-3xl font-semibold text-wood-900">
                     Special menus
                   </h2>
@@ -413,18 +512,35 @@ export default function Home() {
                       <h3 className="text-lg md:text-xl font-semibold text-wood-900">
                         {list.name}
                       </h3>
-                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                        {list.items.map((item) => (
+                      <div
+                        ref={(el) => {
+                          if (el) {
+                            specialMenusRowRefs.current[list.id] = el;
+                          }
+                        }}
+                        className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide cursor-grab active:cursor-grabbing"
+                        onMouseDown={handleDragStart}
+                        onMouseMove={handleDragMove}
+                        onMouseLeave={handleDragEnd}
+                        onMouseUp={handleDragEnd}
+                      >
+                        {list.items.map((item) => {
+                          const itemKey = item.id ?? item.menu_category_id ?? item.name;
+                          const isActive = activeSpecialMenuItemId === itemKey;
+                          return (
                           <article
-                            key={item.id ?? item.menu_category_id ?? item.name}
-                            className="w-56 shrink-0 rounded-2xl bg-white/5 border border-white/10 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                            key={itemKey}
+                            className="group relative w-56 shrink-0 rounded-2xl bg-white/5 border border-white/10 shadow-sm hover:shadow-md transition-transform duration-200 hover:scale-105 overflow-hidden"
+                            onClick={() =>
+                              setActiveSpecialMenuItemId((prev) => (prev === itemKey ? null : itemKey))
+                            }
                           >
-                            <div className="h-32 w-full overflow-hidden bg-black/5">
+                            <div className="h-48 w-full overflow-hidden bg-black/5">
                               {item.image_url ? (
                                 <img
                                   src={item.image_url}
                                   alt={item.name ?? "Special item"}
-                                  className="h-full w-full object-cover"
+                                  className="h-full w-full object-cover transition duration-200 group-hover:blur-sm group-hover:brightness-75"
                                 />
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center bg-wood-300/40 text-wood-700 text-sm font-semibold">
@@ -432,18 +548,55 @@ export default function Home() {
                                 </div>
                               )}
                             </div>
-                            <div className="px-3 py-3">
+                            <div className="px-3 py-3 space-y-1">
                               <h4 className="text-sm font-semibold text-wood-900 line-clamp-2">
                                 {item.name}
                               </h4>
                               {item.price != null && item.price !== "" && (
-                                <p className="mt-1 text-sm font-semibold text-wood-900">
+                                <p className="text-sm font-semibold text-wood-900">
                                   {formatPrice(item.price)}
                                 </p>
                               )}
                             </div>
+                            {item.description && (
+                              <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 transition-all duration-200 ${
+                                isActive ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100"
+                              }`}>
+                                <div className="mx-1 mb-1 rounded-2xl bg-white text-wood-800 text-[11px] leading-snug p-3 shadow-xl backdrop-blur-md max-h-40 overflow-y-auto">
+                                  <p className="whitespace-pre-line">{item.description}</p>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addItem(item, 1);
+                                    }}
+                                    className="mt-2 w-full rounded-full bg-accent px-3 py-1.5 text-[11px] font-semibold text-wood-950 hover:bg-accent-hover transition-colors pointer-events-auto"
+                                  >
+                                    Add to cart
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            {!item.description && (
+                              <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 transition-all duration-200 ${
+                                isActive ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100"
+                              }`}>
+                                <div className="mx-1 mb-1 rounded-2xl bg-white text-wood-800 text-[11px] leading-snug p-3 shadow-xl backdrop-blur-md">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addItem(item, 1);
+                                    }}
+                                    className="w-full rounded-full bg-accent px-3 py-1.5 text-[11px] font-semibold text-wood-950 hover:bg-accent-hover transition-colors pointer-events-auto"
+                                  >
+                                    Add to cart
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </article>
-                        ))}
+                        )})}
                       </div>
                     </div>
                   ))}

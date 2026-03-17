@@ -1,0 +1,60 @@
+[33mcommit 33a43d71dcaa5ba0f33e563fb951abb439718f23[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31mgithub/master[m[33m)[m
+Author: krishna <nakunglafa@gmail.com>
+Date:   Tue Mar 17 18:52:24 2026 +0000
+
+    version 1
+
+[33mcommit d9a2e9b056fd92d7da3e0ff88cb1b31be46d4622[m
+Merge: bad3d03 a8c6707
+Author: krishna <nakunglafa@gmail.com>
+Date:   Tue Mar 17 17:46:36 2026 +0000
+
+    Merge branch 'master' of https://github.com/nakunglafa/lusiqueira
+
+[33mcommit bad3d0311a59ba7a58617ae059300502e95f6d6f[m
+Author: krishna <nakunglafa@gmail.com>
+Date:   Tue Mar 17 17:46:33 2026 +0000
+
+    stagged
+
+[33mcommit a8c670783aa9c80b980a707d01692d904579bc77[m
+Author: nakunglafa <nakunglafa@gmail.com>
+Date:   Tue Mar 17 15:26:38 2026 +0100
+
+    seo updated
+
+[33mcommit 354dcc8baf9cde5100e3c7e0454139f3e2253738[m
+Author: krishna <nakunglafa@gmail.com>
+Date:   Mon Mar 16 16:32:56 2026 +0000
+
+    frist version
+
+[33mcommit 0d3f1d3990f8dc80aa4e14d348db763278266619[m
+Author: root <root@digitallisbon.pt>
+Date:   Fri Mar 13 17:46:03 2026 +0100
+
+    prod1
+
+[33mcommit 3530cef961385ea9f07acf3490792826c36c3733[m
+Author: root <root@digitallisbon.pt>
+Date:   Fri Mar 13 17:42:58 2026 +0100
+
+    prod1
+
+[33mcommit 8f7bbe606113d6fcdb3a3b656adc41baea71bac4[m
+Author: krishna <nakunglafa@gmail.com>
+Date:   Mon Mar 9 22:32:37 2026 +0000
+
+    debug building
+
+[33mcommit 7623ad1d8c66a00e136e01aa395c30952ccda184[m
+Author: krishna <nakunglafa@gmail.com>
+Date:   Mon Mar 9 21:47:25 2026 +0000
+
+    version1
+
+[33mcommit 186ebe26a681308dba4d66c4a5a96d984111e38e[m
+Author: krishna <nakunglafa@gmail.com>
+Date:   Thu Mar 5 18:05:53 2026 +0000
+
+    Initial commit from Create Next App
