@@ -290,7 +290,7 @@ export function SettingsTab({ restaurantId, token, restaurant, onRefresh, onRest
   if (loading) return <p className="text-owner-charcoal">Loading settings...</p>;
 
   return (
-    <div className="flex flex-col lg:flex-row lg:gap-8">
+    <div className="flex flex-col lg:flex-row lg:gap-8 max-w-full min-w-0">
       {/* Mobile: sticky top horizontal scroll nav – slick, always at top for easy access */}
       <nav
         aria-label="Settings navigation"

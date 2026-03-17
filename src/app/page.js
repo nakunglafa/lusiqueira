@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { getRestaurant } from "@/lib/api";
@@ -29,6 +29,13 @@ const BANNER_SLIDES = [
 ];
 
 const RESTAURANT_ID = process.env.NEXT_PUBLIC_RESTAURANT_ID || "9";
+
+function formatPrice(value) {
+  if (value == null || value === "") return "";
+  const n = typeof value === "number" ? value : parseFloat(String(value).replace(/[^0-9.-]/g, ""));
+  if (Number.isNaN(n)) return "";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+}
 
 // Helper function to capitalize days and format times to 12-hour AM/PM format
 function formatTime(timeStr) {
@@ -126,6 +133,27 @@ export default function Home() {
   const restaurant = data?.restaurant;
   // According to the new JSON structure, slots are inside data.opening_hours.opening_slots
   const openingHours = data?.opening_hours?.opening_slots || [];
+
+  const specialItems = useMemo(() => {
+    const lists =
+      data?.special_menus ??
+      restaurant?.special_menus ??
+      [];
+    if (!Array.isArray(lists)) return [];
+    const seen = new Set();
+    const items = [];
+    lists.forEach((list) => {
+      const arr = Array.isArray(list.items) ? list.items : [];
+      arr.forEach((item) => {
+        const id = item.id ?? item.menu_item_id;
+        if (!id || seen.has(id)) return;
+        seen.add(id);
+        if (item.is_available === false) return;
+        items.push(item);
+      });
+    });
+    return items.slice(0, 12);
+  }, [data, restaurant]);
 
   return (
     <div className="min-h-screen bg-wood-100">
@@ -239,6 +267,66 @@ export default function Home() {
             </div>
           )}
         </section>
+
+        {!loading && !error && specialItems.length > 0 && (
+          <section className="mb-12 md:mb-16">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl md:text-3xl font-semibold text-wood-900">
+                Chef&apos;s specials
+              </h2>
+              <Link
+                href="/menu"
+                className="text-sm font-medium text-wood-700 hover:text-wood-900"
+              >
+                View full menu
+              </Link>
+            </div>
+            <p className="mb-4 text-sm text-wood-600">
+              A curated selection of highlighted dishes from the menu.
+            </p>
+            <div className="-mx-4 px-4">
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-wood-400/70 scrollbar-track-transparent">
+                {specialItems.map((item) => (
+                  <article
+                    key={item.id ?? item.menu_item_id}
+                    className="relative w-56 shrink-0 rounded-2xl overflow-hidden bg-white/5 border border-white/10 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="relative h-40 w-full overflow-hidden">
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={item.name ?? "Special item"}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-wood-300/40 text-wood-700 text-sm font-semibold">
+                          {item.name ?? "Special item"}
+                        </div>
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 via-black/30 to-transparent px-3 py-2">
+                        <p className="text-sm font-semibold text-white line-clamp-2">
+                          {item.name}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="px-3 py-2">
+                      {item.price != null && item.price !== "" && (
+                        <p className="text-sm font-semibold text-wood-900">
+                          {formatPrice(item.price)}
+                        </p>
+                      )}
+                      {item.description && (
+                        <p className="mt-1 text-xs text-wood-600 line-clamp-2">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {!loading && !error && (
           <section className="glass mt-12 md:mt-16 rounded-2xl p-6 md:p-8 border border-white/10">

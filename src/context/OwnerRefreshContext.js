@@ -26,7 +26,9 @@ export function OwnerRefreshProvider({ children }) {
       try {
         fn();
       } catch (e) {
-        console.warn("[OwnerRefresh] Refresh callback error:", e);
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[OwnerRefresh] Refresh callback error:", e);
+        }
       }
     });
   }, []);

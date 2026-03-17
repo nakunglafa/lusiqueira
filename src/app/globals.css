@@ -74,23 +74,7 @@
   --font-size-xs: 0.9375rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1a1612;
-    --foreground: #f2ebe3;
-    --wood-50: #161310;
-    --wood-100: #1a1612;
-    --wood-200: #241e19;
-    --wood-300: #2d2620;
-    --wood-400: #3d342c;
-    --wood-500: #5c4f42;
-    --wood-600: #b8a090;
-    --wood-700: #d4c4b0;
-    --wood-800: #e8ddd0;
-    --wood-900: #f2ebe3;
-    --wood-950: #faf6f2;
-  }
-}
+/* Disable automatic OS-level dark theme so the site always uses the main light palette */
 
 html {
   font-size: 17px;
@@ -125,6 +109,16 @@ body {
 }
 .owner-theme .owner-card .owner-muted {
   color: var(--owner-muted);
+}
+
+/* Owner dashboard should always use the same soft light theme,
+   even if the OS is in dark mode. Neutralize Tailwind dark:*
+   utilities inside the owner layout to avoid unexpected dark
+   backgrounds or text colors. */
+.owner-theme [class*="dark:bg-"],
+.owner-theme [class*="dark:text-"] {
+  background-color: inherit !important;
+  color: inherit !important;
 }
 
 /* Glass utility for client UI */
@@ -164,4 +158,14 @@ body {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Site footer – isolate styling so dashboard components don't accidentally share it */
+.site-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(36, 30, 25, 0.9);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
 }

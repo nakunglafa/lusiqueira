@@ -138,7 +138,7 @@ export function OrdersTab({ restaurantId, orders: ordersProp, onRefresh }) {
   }
 
   return (
-    <div className="space-y-4 relative">
+    <div className="space-y-6 relative max-w-full min-w-0">
       <Toast
         message={toastMessage}
         type="error"
